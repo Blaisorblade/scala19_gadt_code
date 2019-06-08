@@ -1,3 +1,4 @@
+object openGADTsBad {
 // object Test {
 //   abstract class ExprBase { s =>
 //     type A
@@ -208,4 +209,5 @@ class EncodedWorkingishExtend extends EncodedWorkingish {
     case _ =>
       super.eval(e)
   }
+}
 }
