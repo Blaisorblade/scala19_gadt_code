@@ -45,7 +45,7 @@
 //   }
 // }
 
-object Source {
+class Source {
   trait Expr[A]
   case class Lit(n: Int) extends Expr[Int]
   case class Plus(lhs: Expr[Int], rhs: Expr[Int]) extends Expr[Int]
@@ -55,7 +55,7 @@ object Source {
 
   def eval[A](e: Expr[A]): A = e match {
     case Lit(n) => n
-    case Plus(a,b) => eval(a) + eval(b)
+    case Plus(lhs, rhs) => eval(lhs) + eval(rhs)
     case Var(x) => x
     case f: Fun[a,b] =>
       (x: a) => eval(f.fun(Var(x)))
@@ -63,7 +63,17 @@ object Source {
   }
 }
 
-object Encoded {
+class SourceExtend extends Source {
+  case class Minus(lhs: Expr[Int], rhs: Expr[Int]) extends Expr[Int]
+  override def eval[A](e: Expr[A]): A = e match {
+    case Minus(lhs, rhs) =>
+      eval(lhs) - eval(rhs)
+    case _ =>
+      super.eval(e)
+  }
+}
+
+class Encoded {
   type Expr[+a] = ExprBase { type A <: a }
   abstract class ExprBase { s =>
     type A
@@ -112,8 +122,21 @@ object Encoded {
   //     }
   // }
 }
+class EncodedExtends extends Encoded {
+  abstract class Minus extends ExprBase { s =>
+    type A = Int
+    val lhs: Expr[A]
+    val rhs: Expr[A]
+  }
+  // def eval(e: ExprBase): e.A = e match {
+  //   case m: (Minus & e.type) =>
+  //     eval(m.lhs) - eval(m.rhs)
+  //   case _ =>
+  //     super.eval(e)
+  // }
+}
 
-object EncodedWorkingish {
+class EncodedWorkingish {
   type Expr[+a] = ExprBase { type A <: a }
   abstract class ExprBase { s =>
     type A
@@ -161,5 +184,28 @@ object EncodedWorkingish {
     //     val w = f.fun(new Var {type A = f.B; val a = x})
     //     eval(w)
     //   }): f.A): e.A //: (f.B => f.C)
+  }
+}
+class EncodedWorkingishExtend extends EncodedWorkingish {
+  abstract class Minus extends ExprBase { s =>
+    type A <: Int //A = Int breaks
+    val lhs: Expr[A]
+    val rhs: Expr[A]
+  }
+
+  override def eval(e: ExprBase): e.A = e match {
+    case m: (Minus & e.type) =>
+      //we can't subtract them.
+      (eval(m.lhs): m.A)
+      (eval(m.rhs): m.A)
+      // val n: m.type & e.type = m
+      // val x: m.A = 1
+      // // val eq1 : m.A <:< n.A = implicitly //[<:<[e.A, e.A]]
+      // val eq2 : n.A <:< e.A = implicitly //[<:<[e.A, e.A]]
+      // val eq3 : Int <:< n.A = implicitly[n.A <:< n.A]
+      // (eval(n.lhs): n.A) -
+      // (eval(n.rhs): n.A)
+    case _ =>
+      super.eval(e)
   }
 }
