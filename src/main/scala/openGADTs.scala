@@ -52,6 +52,7 @@ object openGADTs {
     }
 
     def eval[A](e: Expr[A]): A = e match {
+      // Beware `& e.type` is not required in the extension we describe, but is currently needed in Dotty.
       case l: (Lit & e.type) => l.n: l.A
       case v: (Var & e.type) => v.a: v.A
       case p: (Plus & e.type) =>
