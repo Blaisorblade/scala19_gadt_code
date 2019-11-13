@@ -46,7 +46,7 @@ object stlc_hoas {
 object stlc_deBruijn {
   // Variables
   enum Var[G, A] {
-    case Z[G, A] extends Var[(A, G), A]
+    case Z[G, A]() extends Var[(A, G), A]
     case S[G, A, B](x: Var[G, A]) extends Var[(B, G), A]
   }
   import Var._
@@ -125,7 +125,7 @@ object stlc_deBruijn {
 object stlc_deBruijn_encoded {
   object Version1 {
     trait Var[G, A]
-    case class Z[G, A] extends Var[(A, G), A]
+    case class Z[G, A]() extends Var[(A, G), A]
     case class S[G, A, B](x: Var[G, A]) extends Var[(B, G), A]
 
     def evalVar[G, A](x: Var[G, A])(rho: G): A = x match {

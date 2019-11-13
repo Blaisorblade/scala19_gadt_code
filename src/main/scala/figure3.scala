@@ -91,10 +91,10 @@ object Figure3 {
 
   }
 
-def eval[A](e: Expr[A]): A = e.`match`[A](
-  Lit = l => l.n: l.A,
-  Plus = p => (eval(p.lhs) + eval(p.rhs)): p.A,
-  App = a => eval(a.fun).apply(eval(a.arg)): a.A,
-  Fun = f => ((x: f.B) => eval[f.C](f.fun(new Var { type A = f.B; val a = x }))): f.A,
-  Var = v => v.a: v.A)
+  def eval[A](e: Expr[A]): A = e.`match`[A](
+    Lit = l => l.n: l.A,
+    Plus = p => (eval(p.lhs) + eval(p.rhs)): p.A,
+    App = a => eval(a.fun).apply(eval(a.arg)): a.A,
+    Fun = f => ((x: f.B) => eval[f.C](f.fun(new Var { type A = f.B; val a = x }))): f.A,
+    Var = v => v.a: v.A)
 }
